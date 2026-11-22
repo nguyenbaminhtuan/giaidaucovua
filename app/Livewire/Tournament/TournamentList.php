@@ -17,6 +17,11 @@ class TournamentList extends Component
     public ?int $editingTournamentId = null;
     public string $editingName = '';
 
+    // Delete confirmation with PIN
+    public ?int $deletingTournamentId = null;
+    public string $deletingTournamentName = '';
+    public string $deletePinInput = '';
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -49,13 +54,39 @@ class TournamentList extends Component
         $this->editingTournamentId = null;
     }
 
-    public function deleteTournament(int $id): void
+    public function confirmDelete(int $id, string $name): void
     {
-        $tournament = Tournament::find($id);
-        if ($tournament) {
-            $tournament->delete();
-            session()->flash('message', "Đã xóa giải đấu {$tournament->name}.");
+        $this->deletingTournamentId = $id;
+        $this->deletingTournamentName = $name;
+        $this->deletePinInput = '';
+        $this->resetErrorBag();
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->deletingTournamentId = null;
+        $this->deletingTournamentName = '';
+        $this->deletePinInput = '';
+        $this->resetErrorBag();
+    }
+
+    public function executeDelete(): void
+    {
+        $correctPin = (string) env('ADMIN_DELETE_PIN', '2026');
+
+        if (trim($this->deletePinInput) !== $correctPin) {
+            $this->addError('deletePinInput', 'Mã PIN bảo vệ không chính xác. Không thể xóa giải.');
+            return;
         }
+
+        $tournament = Tournament::find($this->deletingTournamentId);
+        if ($tournament) {
+            $tournamentName = $tournament->name;
+            $tournament->delete();
+            session()->flash('message', "Đã xóa vĩnh viễn giải đấu {$tournamentName}.");
+        }
+
+        $this->cancelDelete();
     }
 
     public function render()

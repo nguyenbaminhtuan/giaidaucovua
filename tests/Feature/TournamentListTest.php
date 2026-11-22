@@ -42,13 +42,32 @@ class TournamentListTest extends TestCase
             ->assertDontSee('Giải Cờ Vua Sài Gòn');
     }
 
-    public function test_tournament_can_be_deleted(): void
+    public function test_tournament_cannot_be_deleted_with_wrong_pin(): void
+    {
+        $tournament = Tournament::create(['name' => 'Giải Được Bảo Vệ', 'format' => 'swiss']);
+
+        Livewire::test(TournamentList::class)
+            ->call('confirmDelete', $tournament->id, $tournament->name)
+            ->set('deletePinInput', '9999')
+            ->call('executeDelete')
+            ->assertHasErrors(['deletePinInput'])
+            ->assertSee('Mã PIN bảo vệ không chính xác');
+
+        $this->assertDatabaseHas('tournaments', [
+            'id' => $tournament->id,
+        ]);
+    }
+
+    public function test_tournament_can_be_deleted_with_correct_pin(): void
     {
         $tournament = Tournament::create(['name' => 'Giải Cần Xóa', 'format' => 'swiss']);
 
         Livewire::test(TournamentList::class)
-            ->call('deleteTournament', $tournament->id)
-            ->assertSee('Đã xóa giải đấu Giải Cần Xóa.');
+            ->call('confirmDelete', $tournament->id, $tournament->name)
+            ->set('deletePinInput', '2026')
+            ->call('executeDelete')
+            ->assertHasNoErrors()
+            ->assertSee('Đã xóa vĩnh viễn giải đấu Giải Cần Xóa.');
 
         $this->assertDatabaseMissing('tournaments', [
             'id' => $tournament->id,

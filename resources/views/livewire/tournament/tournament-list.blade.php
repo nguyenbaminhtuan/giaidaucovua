@@ -112,9 +112,8 @@
                     <!-- Footer Actions -->
                     <div class="border-t border-slate-800/80 pt-4 mt-4 flex items-center justify-between">
                         <button type="button"
-                                wire:click="deleteTournament({{ $t->id }})"
-                                wire:confirm="Bạn có chắc chắn muốn xóa giải '{{ $t->name }}' không? Toàn bộ dữ liệu cặp đấu và điểm số sẽ bị xóa vĩnh viễn."
-                                class="text-xs text-slate-500 hover:text-rose-400 transition">
+                                wire:click="confirmDelete({{ $t->id }}, '{{ addslashes($t->name) }}')"
+                                class="text-xs text-slate-500 hover:text-rose-400 transition cursor-pointer">
                             Xóa giải
                         </button>
 
@@ -129,6 +128,60 @@
 
         <div class="pt-2">
             {{ $tournaments->links() }}
+        </div>
+    @endif
+
+    <!-- Delete Confirmation Modal with PIN -->
+    @if ($deletingTournamentId)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+            <div class="bg-slate-900 border border-rose-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center text-2xl flex-shrink-0">
+                        ⚠️
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="text-lg font-bold text-white">Xác nhận xóa giải đấu</h3>
+                        <p class="text-xs text-slate-400">
+                            Bạn đang yêu cầu xóa vĩnh viễn giải đấu:
+                            <strong class="text-white block mt-1 font-semibold">"{{ $deletingTournamentName }}"</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-300">
+                    Cảnh báo: Toàn bộ bảng đấu, kỳ thủ, ván đấu và bảng xếp hạng của giải này sẽ bị xóa vĩnh viễn không thể khôi phục!
+                </div>
+
+                <form wire:submit="executeDelete" class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-300">
+                            Nhập mã PIN bảo vệ của Ban tổ chức để xóa:
+                        </label>
+                        <input type="password"
+                               maxlength="10"
+                               wire:model="deletePinInput"
+                               placeholder="Mã PIN 4 số..."
+                               autofocus
+                               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-center text-white text-lg font-mono tracking-widest focus:outline-none focus:border-rose-500 transition">
+                        @error('deletePinInput')
+                            <span class="text-rose-400 text-xs block font-medium">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button"
+                                wire:click="cancelDelete"
+                                class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit"
+                                class="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 transition flex items-center gap-1.5 cursor-pointer">
+                            <span>🗑️</span>
+                            <span>Xác nhận xóa vĩnh viễn</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     @endif
 </div>
