@@ -13,18 +13,18 @@ FROM serversideup/php:8.3-fpm-nginx
 USER root
 RUN install-php-extensions pgsql pdo_pgsql
 
-# Automatically optimize and run migrations on startup
-ENV AUTORUN_LARAVEL_MIGRATION=true \
-    AUTORUN_LARAVEL_STORAGE_LINK=true \
-    AUTORUN_LARAVEL_CONFIG_CACHE=true \
-    AUTORUN_LARAVEL_ROUTE_CACHE=true \
-    AUTORUN_LARAVEL_VIEW_CACHE=true
+# Direct logs to container stderr so errors appear on Render console
+ENV LOG_CHANNEL=stderr
 
 WORKDIR /var/www/html
 
 # Copy application source
 COPY --chown=www-data:www-data . /var/www/html
 COPY --from=frontend --chown=www-data:www-data /app/public/build /var/www/html/public/build
+
+# Copy startup initialization script
+COPY docker/99-laravel-init.sh /etc/entrypoint.d/99-laravel-init.sh
+RUN chmod +x /etc/entrypoint.d/99-laravel-init.sh
 
 # Install production Composer dependencies
 USER www-data
