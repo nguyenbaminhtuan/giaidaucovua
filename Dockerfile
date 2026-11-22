@@ -9,6 +9,10 @@ RUN npm run build
 # Stage 2: PHP Application Server
 FROM serversideup/php:8.3-fpm-nginx
 
+# Install PostgreSQL PHP extensions
+USER root
+RUN install-php-extensions pgsql pdo_pgsql
+
 # Automatically optimize and run migrations on startup
 ENV AUTORUN_LARAVEL_MIGRATION=true \
     AUTORUN_LARAVEL_STORAGE_LINK=true \
