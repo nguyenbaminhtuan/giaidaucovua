@@ -1,0 +1,138 @@
+<div class="space-y-6">
+    <!-- Tournament Header Banner -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+        <div>
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider {{ $tournament->format === 'round_robin_groups' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' }}">
+                    {{ $tournament->format === 'round_robin_groups' ? 'Đấu Vòng Tròn Chia Bảng' : 'Hệ Thụy Sĩ (Swiss)' }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Đang Diễn Ra
+                </span>
+            </div>
+
+            @if ($isEditingName)
+                <form wire:submit="saveName" class="flex flex-wrap items-center gap-2 mt-2">
+                    <input type="text"
+                           wire:model="editingName"
+                           class="bg-slate-950 border border-amber-500 rounded-lg px-3 py-1.5 text-white text-lg font-bold focus:outline-none focus:ring-1 focus:ring-amber-500 w-full sm:w-80">
+                    <button type="submit" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-lg transition">
+                        Lưu tên
+                    </button>
+                    <button type="button" wire:click="cancelEditingName" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition">
+                        Hủy
+                    </button>
+                </form>
+                @error('editingName') <span class="text-rose-400 text-xs block mt-1">{{ $message }}</span> @enderror
+            @else
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                        {{ $tournament->name }}
+                    </h1>
+                    <button type="button"
+                            wire:click="startEditingName"
+                            class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1"
+                            title="Chỉnh sửa tên giải đấu">
+                        <span>✏️</span>
+                        <span>Đổi tên</span>
+                    </button>
+                </div>
+            @endif
+
+            @if (session()->has('name_updated'))
+                <span class="text-emerald-400 text-xs block mt-1">✓ {{ session('name_updated') }}</span>
+            @endif
+        </div>
+
+        <!-- Quick Tabs -->
+        <div class="flex items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+            <button type="button" wire:click="switchTab('matches')" class="px-4 py-2 rounded-lg text-sm font-bold transition {{ $activeTab === 'matches' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
+                ⚔️ Cặp Đấu
+            </button>
+            <button type="button" wire:click="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-bold transition {{ $activeTab === 'standings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
+                🏆 Bảng Xếp Hạng
+            </button>
+        </div>
+    </div>
+
+    @if ($activeTab === 'matches')
+        <!-- Matches Tab View -->
+        <div class="space-y-4">
+            <!-- Quick Search Match Box -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-2.5 flex-1">
+                    <span class="text-slate-500 text-sm">🔍</span>
+                    <input type="text"
+                           wire:model.live.debounce.250ms="matchSearch"
+                           placeholder="Tìm kiếm nhanh cặp đấu theo tên kỳ thủ trong toàn giải..."
+                           class="bg-transparent border-none text-white text-sm w-full focus:outline-none placeholder:text-slate-500">
+                </div>
+
+                @if ($isSearching)
+                    <button type="button"
+                            wire:click="clearMatchSearch"
+                            class="text-xs px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1 transition">
+                        <span>✕</span> Xóa tìm kiếm
+                    </button>
+                @endif
+            </div>
+
+            @if ($isSearching)
+                <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+                    <span>Kết quả tìm kiếm cho: <strong class="text-amber-400">"{{ $matchSearch }}"</strong> ({{ $matches->count() }} cặp đấu)</span>
+                </div>
+            @else
+                <!-- Filter Bar: Group Tabs (if Round Robin) & Round Selector -->
+                <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- Group Tabs -->
+                    @if ($tournament->format === 'round_robin_groups' && $tournament->groups->isNotEmpty())
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                            <span class="text-xs font-semibold text-slate-400 uppercase mr-1">Bảng:</span>
+                            @foreach ($tournament->groups as $group)
+                                <button type="button" wire:click="selectGroup({{ $group->id }})" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition {{ $selectedGroupId === $group->id ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700' }}">
+                                    {{ $group->name }}
+                                </button>
+                            @endforeach
+                        </div>
+                    @else
+                        <div></div>
+                    @endif
+
+                    <!-- Round Selector -->
+                    <div class="flex items-center gap-2 overflow-x-auto">
+                        <span class="text-xs font-semibold text-slate-400 uppercase mr-1">Vòng đấu:</span>
+                        @foreach ($rounds as $r)
+                            <button type="button" wire:click="selectRound({{ $r->round_number }})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {{ ($activeRound?->round_number ?? 1) === $r->round_number ? 'bg-slate-100 text-slate-950 shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700' }}">
+                                Vòng {{ $r->round_number }}
+                            </button>
+                        @endforeach
+
+                        @if ($tournament->format === 'swiss')
+                            <button type="button" wire:click="generateNextSwissRound" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition">
+                                + Bốc Thăm Vòng Mới
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- Matches List -->
+            @if ($matches->isEmpty())
+                <div class="text-center py-12 bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
+                    <p class="text-base font-medium">
+                        {{ $isSearching ? 'Không tìm thấy cặp đấu nào phù hợp với từ khóa.' : 'Chưa có cặp đấu nào trong vòng này.' }}
+                    </p>
+                </div>
+            @else
+                <div class="space-y-3">
+                    @foreach ($matches as $match)
+                        <livewire:tournament.match-row :matchId="$match->id" :showContext="$isSearching" :key="'match-' . $match->id" />
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    @else
+        <!-- Standings Tab View -->
+        <livewire:tournament.standings-board :tournamentId="$tournament->id" :selectedGroupId="$selectedGroupId" />
+    @endif
+</div>
