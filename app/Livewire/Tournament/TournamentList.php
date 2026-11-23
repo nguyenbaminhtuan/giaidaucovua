@@ -72,7 +72,7 @@ class TournamentList extends Component
 
     public function executeDelete(): void
     {
-        $correctPin = (string) env('ADMIN_DELETE_PIN', '2026');
+        $correctPin = (string) env('ADMIN_PIN', env('ADMIN_DELETE_PIN', '1210'));
 
         if (trim($this->deletePinInput) !== $correctPin) {
             $this->addError('deletePinInput', 'Mã PIN bảo vệ không chính xác. Không thể xóa giải.');

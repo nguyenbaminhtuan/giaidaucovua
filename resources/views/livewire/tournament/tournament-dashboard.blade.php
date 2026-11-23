@@ -29,13 +29,15 @@
                     <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                         {{ $tournament->name }}
                     </h1>
-                    <button type="button"
-                            wire:click="startEditingName"
-                            class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1"
-                            title="Chỉnh sửa tên giải đấu">
-                        <span>✏️</span>
-                        <span>Đổi tên</span>
-                    </button>
+                    @if (session('is_admin'))
+                        <button type="button"
+                                wire:click="startEditingName"
+                                class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1 cursor-pointer"
+                                title="Chỉnh sửa tên giải đấu">
+                            <span>✏️</span>
+                            <span>Đổi tên</span>
+                        </button>
+                    @endif
                 </div>
             @endif
 
@@ -112,8 +114,8 @@
                             </button>
                         @endforeach
 
-                        @if ($tournament->format === 'swiss')
-                            <button type="button" wire:click="generateNextSwissRound" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition">
+                        @if ($tournament->format === 'swiss' && session('is_admin'))
+                            <button type="button" wire:click="generateNextSwissRound" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">
                                 + Bốc Thăm Vòng Mới
                             </button>
                         @endif

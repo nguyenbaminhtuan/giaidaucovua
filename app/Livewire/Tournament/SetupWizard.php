@@ -38,6 +38,14 @@ class SetupWizard extends Component
         ['game_number' => 2, 'base_minutes' => 15, 'increment_seconds' => 2],
     ];
 
+    public function mount()
+    {
+        if (! session('is_admin')) {
+            session()->flash('auth_required', 'Bạn cần nhập mã PIN quản trị (1210) để tạo giải đấu mới.');
+            return $this->redirect(route('home'), navigate: true);
+        }
+    }
+
     public function addGroup(): void
     {
         $letters = range('A', 'Z');

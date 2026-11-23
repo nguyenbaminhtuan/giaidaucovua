@@ -6,6 +6,8 @@
 │   ├── Events/               # Domain Events (MatchResultConfirmed)
 │   ├── Listeners/            # Event Listeners (UpdateStandingsListener)
 │   ├── Livewire/             # Reactive UI Components
+│   │   ├── Auth/
+│   │   │   └── AdminBar.php
 │   │   └── Tournament/
 │   │       ├── TournamentList.php
 │   │       ├── SetupWizard.php

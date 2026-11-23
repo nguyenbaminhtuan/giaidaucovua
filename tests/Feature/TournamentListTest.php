@@ -64,7 +64,7 @@ class TournamentListTest extends TestCase
 
         Livewire::test(TournamentList::class)
             ->call('confirmDelete', $tournament->id, $tournament->name)
-            ->set('deletePinInput', '2026')
+            ->set('deletePinInput', '1210')
             ->call('executeDelete')
             ->assertHasNoErrors()
             ->assertSee('Đã xóa vĩnh viễn giải đấu Giải Cần Xóa.');

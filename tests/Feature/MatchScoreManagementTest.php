@@ -23,6 +23,8 @@ class MatchScoreManagementTest extends TestCase
 
     public function test_setup_wizard_creates_tournament_with_per_group_time_controls(): void
     {
+        session(['is_admin' => true]);
+
         Livewire::test(SetupWizard::class)
             ->set('name', 'Giải Đấu Nhiều Bảng Khác Giờ')
             ->set('format', 'round_robin_groups')
@@ -73,6 +75,7 @@ class MatchScoreManagementTest extends TestCase
 
     public function test_match_row_records_game_results_and_confirms_with_green_checkmark(): void
     {
+        session(['is_admin' => true]);
         Event::fake([MatchResultConfirmed::class]);
 
         $tournament = Tournament::create(['name' => 'Giải Test', 'format' => 'round_robin_groups']);

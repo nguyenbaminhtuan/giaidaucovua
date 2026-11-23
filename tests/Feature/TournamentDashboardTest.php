@@ -14,6 +14,8 @@ class TournamentDashboardTest extends TestCase
 
     public function test_tournament_name_can_be_edited_from_dashboard(): void
     {
+        session(['is_admin' => true]);
+
         $tournament = Tournament::create([
             'name' => 'Giải Cờ Vua Mùa Đông 2026',
             'format' => 'swiss',

@@ -20,9 +20,7 @@
                 <a href="{{ route('tournament.index') }}" class="px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition">
                     📋 Danh Sách Giải
                 </a>
-                <a href="{{ route('tournament.create') }}" class="px-3.5 py-1.5 rounded-lg text-sm font-medium bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-sm transition">
-                    + Tạo giải đấu mới
-                </a>
+                <livewire:auth.admin-bar />
             </nav>
         </div>
     </header>

@@ -32,6 +32,9 @@ class PlayoffBoard extends Component
 
     public function startEditingHeader(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $t = Tournament::findOrFail($this->tournamentId);
         $this->editingTitle = $t->playoff_title ?: 'Vòng Loại Trực Tiếp (Playoff)';
         $this->editingDescription = $t->playoff_description ?: 'Các kỳ thủ đầu bảng gặp nhau theo thể thức đấu loại trực tiếp để tranh Cúp Vô Địch và Hạng Ba.';
@@ -40,6 +43,9 @@ class PlayoffBoard extends Component
 
     public function saveHeader(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $this->validate([
             'editingTitle' => 'required|string|max:255',
             'editingDescription' => 'nullable|string|max:1000',
@@ -82,6 +88,9 @@ class PlayoffBoard extends Component
 
     public function updateAdvancingCount(int $count): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $this->advancingCount = $count;
         $tournament = Tournament::findOrFail($this->tournamentId);
         $tournament->advancing_count = $count;
@@ -91,6 +100,9 @@ class PlayoffBoard extends Component
 
     public function startKnockoutStage(KnockoutSchedulerService $scheduler): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $tournament = Tournament::findOrFail($this->tournamentId);
         $scheduler->generateQuarterFinals($tournament, $this->knockoutGames);
         $this->dispatch('match-updated');
@@ -99,6 +111,9 @@ class PlayoffBoard extends Component
 
     public function generateNextRound(KnockoutSchedulerService $scheduler, int $prevRoundId): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $tournament = Tournament::findOrFail($this->tournamentId);
         $prevRound = Round::findOrFail($prevRoundId);
 
@@ -123,6 +138,9 @@ class PlayoffBoard extends Component
 
     public function resetKnockoutStage(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $tournament = Tournament::findOrFail($this->tournamentId);
         $tournament->rounds()->where('stage', 'knockout')->delete();
         $this->dispatch('match-updated');
@@ -163,6 +181,7 @@ class PlayoffBoard extends Component
             'tournament' => $tournament,
             'knockoutRounds' => $knockoutRounds,
             'advancingPreview' => $advancingPreview,
+            'isAdmin' => (bool) session('is_admin'),
         ]);
     }
 }

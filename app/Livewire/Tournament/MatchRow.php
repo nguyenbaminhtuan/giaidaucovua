@@ -20,6 +20,10 @@ class MatchRow extends Component
 
     public function setGameResult(int $gameId, string $result): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
+
         $match = ChessMatch::with('games')->findOrFail($this->matchId);
 
         if ($match->status === 'completed' || $match->is_bye) {
@@ -38,6 +42,10 @@ class MatchRow extends Component
 
     public function addTieBreakGame(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
+
         $match = ChessMatch::with('games')->findOrFail($this->matchId);
         if ($match->status === 'completed' || $match->is_bye) {
             return;
@@ -69,6 +77,10 @@ class MatchRow extends Component
 
     public function confirmMatch(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
+
         $match = ChessMatch::with(['round', 'games'])->findOrFail($this->matchId);
 
         if (! $match->areAllGamesFinished()) {
@@ -91,6 +103,10 @@ class MatchRow extends Component
 
     public function unlockMatch(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
+
         $match = ChessMatch::findOrFail($this->matchId);
         $match->status = 'pending';
         $match->save();
@@ -106,6 +122,7 @@ class MatchRow extends Component
 
         return view('livewire.tournament.match-row', [
             'match' => $match,
+            'isAdmin' => (bool) session('is_admin'),
         ]);
     }
 }

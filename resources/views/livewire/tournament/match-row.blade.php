@@ -38,44 +38,56 @@
                     Miễn đấu (+1.0)
                 </span>
             @else
-                <!-- Button to add Tie-break game if tied -->
-                @if ($match->status !== 'completed' && $match->areAllGamesFinished() && $match->isTied())
-                    <button type="button" wire:click="addTieBreakGame" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition">
+                <!-- Button to add Tie-break game if tied (Admin only) -->
+                @if ($isAdmin && $match->status !== 'completed' && $match->areAllGamesFinished() && $match->isTied())
+                    <button type="button" wire:click="addTieBreakGame" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition cursor-pointer">
                         <span>⚡</span> + Ván Tie-break
                     </button>
                 @endif
 
                 <!-- Accordion Toggle Button -->
-                <button type="button" wire:click="toggleOpen" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                <button type="button" wire:click="toggleOpen" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer">
                     <span>{{ $match->games->count() }} ván</span>
                     <span class="transform transition-transform duration-200 {{ $isOpen ? 'rotate-180' : '' }}">▼</span>
                 </button>
 
-                <!-- Green Checkmark Confirmation Button -->
-                @if ($match->status === 'completed')
-                    <div class="flex items-center gap-2">
-                        <span class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            <span>✓</span> Đã chốt điểm
-                        </span>
-                        <button type="button" wire:click="unlockMatch" class="text-xs text-slate-400 hover:text-amber-400 underline" title="Mở khóa để sửa điểm">
-                            Sửa lại
-                        </button>
-                    </div>
-                @else
-                    @if ($match->areAllGamesFinished())
-                        @if ($match->round?->isKnockout() && $match->isTied())
-                            <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận loại trực tiếp hòa cần đấu thêm Tie-break!">
-                                <span>⚠️</span> Cần đấu Tie-break
+                <!-- Status & Confirmation Actions -->
+                @if ($isAdmin)
+                    @if ($match->status === 'completed')
+                        <div class="flex items-center gap-2">
+                            <span class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                                <span>✓</span> Đã chốt điểm
+                            </span>
+                            <button type="button" wire:click="unlockMatch" class="text-xs text-slate-400 hover:text-amber-400 underline cursor-pointer" title="Mở khóa để sửa điểm">
+                                Sửa lại
                             </button>
+                        </div>
+                    @else
+                        @if ($match->areAllGamesFinished())
+                            @if ($match->round?->isKnockout() && $match->isTied())
+                                <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận loại trực tiếp hòa cần đấu thêm Tie-break!">
+                                    <span>⚠️</span> Cần đấu Tie-break
+                                </button>
+                            @else
+                                <button type="button" wire:click="confirmMatch" wire:loading.attr="disabled" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950 transition cursor-pointer">
+                                    <span>✓</span> Xác nhận cặp này
+                                </button>
+                            @endif
                         @else
-                            <button type="button" wire:click="confirmMatch" wire:loading.attr="disabled" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950 transition cursor-pointer">
-                                <span>✓</span> Xác nhận cặp này
+                            <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed" title="Hãy ghi điểm tất cả các ván trước">
+                                <span>⏳</span> Chưa xong điểm
                             </button>
                         @endif
+                    @endif
+                @else
+                    @if ($match->status === 'completed')
+                        <span class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            <span>✓</span> Đã hoàn tất
+                        </span>
                     @else
-                        <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800/60 text-slate-500 border border-slate-800 cursor-not-allowed" title="Hãy ghi điểm tất cả các ván trước">
-                            <span>⏳</span> Chưa xong điểm
-                        </button>
+                        <span class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400">
+                            <span>⏳</span> Đang diễn ra
+                        </span>
                     @endif
                 @endif
             @endif
@@ -93,9 +105,9 @@
     @if ($isOpen && ! $match->is_bye)
         <div class="border-t border-slate-800/80 bg-slate-950/60 p-4 space-y-3">
             <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                <span>Chi tiết từng ván đấu (Nhấn kết quả để ghi điểm):</span>
-                @if ($match->status !== 'completed')
-                    <button type="button" wire:click="addTieBreakGame" class="text-amber-400 hover:text-amber-300 normal-case flex items-center gap-1">
+                <span>{{ $isAdmin ? 'Chi tiết từng ván đấu (Nhấn kết quả để ghi điểm):' : 'Kết quả chi tiết từng ván đấu:' }}</span>
+                @if ($isAdmin && $match->status !== 'completed')
+                    <button type="button" wire:click="addTieBreakGame" class="text-amber-400 hover:text-amber-300 normal-case flex items-center gap-1 cursor-pointer">
                         <span>⚡</span> + Thêm ván phụ (Tie-break)
                     </button>
                 @endif
@@ -126,29 +138,43 @@
                         </div>
                     </div>
 
-                    <!-- 3 Rapid Result Buttons -->
-                    <div class="flex items-center gap-1.5">
-                        <button type="button"
-                            wire:click="setGameResult({{ $game->id }}, '1-0')"
-                            @disabled($match->status === 'completed')
-                            class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '1-0' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
-                            1 - 0
-                        </button>
+                    <!-- Result: Interactive Buttons for Admin, Static Badges for Viewers -->
+                    @if ($isAdmin)
+                        <div class="flex items-center gap-1.5">
+                            <button type="button"
+                                wire:click="setGameResult({{ $game->id }}, '1-0')"
+                                @disabled($match->status === 'completed')
+                                class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '1-0' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
+                                1 - 0
+                            </button>
 
-                        <button type="button"
-                            wire:click="setGameResult({{ $game->id }}, '0.5-0.5')"
-                            @disabled($match->status === 'completed')
-                            class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '0.5-0.5' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
-                            ½ - ½
-                        </button>
+                            <button type="button"
+                                wire:click="setGameResult({{ $game->id }}, '0.5-0.5')"
+                                @disabled($match->status === 'completed')
+                                class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '0.5-0.5' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
+                                ½ - ½
+                            </button>
 
-                        <button type="button"
-                            wire:click="setGameResult({{ $game->id }}, '0-1')"
-                            @disabled($match->status === 'completed')
-                            class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '0-1' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
-                            0 - 1
-                        </button>
-                    </div>
+                            <button type="button"
+                                wire:click="setGameResult({{ $game->id }}, '0-1')"
+                                @disabled($match->status === 'completed')
+                                class="px-2.5 py-1 text-xs font-bold rounded border transition {{ $game->result === '0-1' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' }}">
+                                0 - 1
+                            </button>
+                        </div>
+                    @else
+                        <div>
+                            @if ($game->result)
+                                <span class="px-3 py-1 rounded text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    {{ $game->result === '0.5-0.5' ? '½ - ½' : $game->result }}
+                                </span>
+                            @else
+                                <span class="px-2.5 py-1 rounded text-xs text-slate-500 bg-slate-900 border border-slate-800">
+                                    Chưa đấu
+                                </span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>

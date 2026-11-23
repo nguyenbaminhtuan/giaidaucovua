@@ -25,10 +25,10 @@
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <button type="submit" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition shadow">
+                        <button type="submit" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition shadow cursor-pointer">
                             Lưu thay đổi
                         </button>
-                        <button type="button" wire:click="cancelEditingHeader" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition">
+                        <button type="button" wire:click="cancelEditingHeader" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition cursor-pointer">
                             Hủy
                         </button>
                     </div>
@@ -38,13 +38,15 @@
                     <h2 class="text-2xl font-black text-white">
                         {{ $tournament->playoff_title ?: '🥊 Vòng Loại Trực Tiếp (Playoff)' }}
                     </h2>
-                    <button type="button"
-                            wire:click="startEditingHeader"
-                            class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1 cursor-pointer"
-                            title="Chỉnh sửa tiêu đề và mô tả">
-                        <span>✏️</span>
-                        <span>Sửa tiêu đề</span>
-                    </button>
+                    @if ($isAdmin)
+                        <button type="button"
+                                wire:click="startEditingHeader"
+                                class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1 cursor-pointer"
+                                title="Chỉnh sửa tiêu đề và mô tả">
+                            <span>✏️</span>
+                            <span>Sửa tiêu đề</span>
+                        </button>
+                    @endif
                 </div>
                 <p class="text-sm text-slate-400 mt-1">
                     {{ $tournament->playoff_description ?: 'Các kỳ thủ đầu bảng gặp nhau theo thể thức đấu loại trực tiếp để tranh Cúp Vô Địch và Hạng Ba.' }}
@@ -52,11 +54,11 @@
             @endif
         </div>
 
-        @if ($knockoutRounds->isNotEmpty())
+        @if ($isAdmin && $knockoutRounds->isNotEmpty())
             <button type="button"
                     wire:click="resetKnockoutStage"
                     wire:confirm="Bạn có chắc chắn muốn xóa và làm lại toàn bộ nhánh đấu Knockout không?"
-                    class="text-xs text-slate-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 px-3 py-1.5 rounded-lg transition">
+                    class="text-xs text-slate-500 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 px-3 py-1.5 rounded-lg transition cursor-pointer">
                 Xóa làm lại nhánh đấu
             </button>
         @endif
@@ -88,15 +90,21 @@
                         <p class="text-xs text-slate-400 mt-0.5">Dựa theo thứ hạng trên bảng xếp hạng vòng bảng hiện tại.</p>
                     </div>
 
-                    <!-- Change advancing count on the fly -->
-                    <div class="flex items-center gap-2 text-xs">
-                        <span class="text-slate-400">Chọn số người đi tiếp:</span>
-                        <select wire:change="updateAdvancingCount($event.target.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-400 font-bold focus:outline-none focus:border-amber-500">
-                            <option value="4" @selected($advancingCount == 4)>Top 4 mỗi bảng (Vào Tứ Kết - 8 người)</option>
-                            <option value="2" @selected($advancingCount == 2)>Top 2 mỗi bảng (Vào Bán Kết - 4 người)</option>
-                            <option value="1" @selected($advancingCount == 1)>Top 1 mỗi bảng (Vào Chung Kết - 2 người)</option>
-                        </select>
-                    </div>
+                    @if ($isAdmin)
+                        <!-- Change advancing count on the fly -->
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-400">Chọn số người đi tiếp:</span>
+                            <select wire:change="updateAdvancingCount($event.target.value)" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+                                <option value="4" @selected($advancingCount == 4)>Top 4 mỗi bảng (Vào Tứ Kết - 8 người)</option>
+                                <option value="2" @selected($advancingCount == 2)>Top 2 mỗi bảng (Vào Bán Kết - 4 người)</option>
+                                <option value="1" @selected($advancingCount == 1)>Top 1 mỗi bảng (Vào Chung Kết - 2 người)</option>
+                            </select>
+                        </div>
+                    @else
+                        <span class="text-xs text-amber-400 font-bold bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/20">
+                            Lấy Top {{ $advancingCount }} mỗi bảng
+                        </span>
+                    @endif
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -126,65 +134,71 @@
                 </div>
             </div>
 
-            <!-- Time Controls Config for Knockout Matches -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-white flex items-center gap-2">
-                            <span>⏱</span> Thiết Lập Số Ván & Thời Gian Vòng Loại Trực Tiếp
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Mỗi cặp đấu Knockout sẽ thi đấu theo cấu hình số ván này.</p>
-                    </div>
-                    <button type="button" wire:click="addKnockoutGame" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition">
-                        + Thêm Ván
-                    </button>
-                </div>
-
-                <div class="space-y-3">
-                    @foreach ($knockoutGames as $gIdx => $g)
-                        <div class="flex flex-wrap items-center justify-between gap-4 p-3 bg-slate-950 border border-slate-800 rounded-xl">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-rose-500/10 text-rose-400 font-bold text-xs flex items-center justify-center border border-rose-500/20">
-                                    {{ $g['game_number'] }}
-                                </span>
-                                <span class="font-bold text-sm text-white">Ván {{ $g['game_number'] }}</span>
-                            </div>
-
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-400">Thời gian gốc:</span>
-                                    <div class="flex items-center">
-                                        <input type="number" min="1" max="180" wire:model="knockoutGames.{{ $gIdx }}.base_minutes" class="w-16 bg-slate-900 border border-slate-700 rounded-l px-2 py-1 text-sm text-center text-white focus:outline-none focus:border-rose-500">
-                                        <span class="bg-slate-800 text-slate-400 px-2 py-1 text-xs border border-l-0 border-slate-700 rounded-r">phút</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-slate-400">Gia tăng (+):</span>
-                                    <div class="flex items-center">
-                                        <input type="number" min="0" max="60" wire:model="knockoutGames.{{ $gIdx }}.increment_seconds" class="w-16 bg-slate-900 border border-slate-700 rounded-l px-2 py-1 text-sm text-center text-white focus:outline-none focus:border-rose-500">
-                                        <span class="bg-slate-800 text-slate-400 px-2 py-1 text-xs border border-l-0 border-slate-700 rounded-r">giây</span>
-                                    </div>
-                                </div>
-
-                                @if (count($knockoutGames) > 1)
-                                    <button type="button" wire:click="removeKnockoutGame({{ $gIdx }})" class="text-xs text-rose-400 hover:text-rose-300">
-                                        Xóa
-                                    </button>
-                                @endif
-                            </div>
+            @if ($isAdmin)
+                <!-- Time Controls Config for Knockout Matches -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <span>⏱</span> Thiết Lập Số Ván & Thời Gian Vòng Loại Trực Tiếp
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Mỗi cặp đấu Knockout sẽ thi đấu theo cấu hình số ván này.</p>
                         </div>
-                    @endforeach
-                </div>
-            </div>
+                        <button type="button" wire:click="addKnockoutGame" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition cursor-pointer">
+                            + Thêm Ván
+                        </button>
+                    </div>
 
-            <!-- Start Playoff Button -->
-            <button type="button"
-                    wire:click="startKnockoutStage"
-                    class="w-full py-4 px-6 rounded-2xl font-black text-base bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white shadow-xl shadow-rose-950 flex items-center justify-center gap-2 transition cursor-pointer">
-                <span>🔥</span>
-                <span>Khởi Tạo Vòng Loại Trực Tiếp (1A vs 4B, 1B vs 4A, 2B vs 3A, 2A vs 3B)</span>
-            </button>
+                    <div class="space-y-3">
+                        @foreach ($knockoutGames as $gIdx => $g)
+                            <div class="flex flex-wrap items-center justify-between gap-4 p-3 bg-slate-950 border border-slate-800 rounded-xl">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-full bg-rose-500/10 text-rose-400 font-bold text-xs flex items-center justify-center border border-rose-500/20">
+                                        {{ $g['game_number'] }}
+                                    </span>
+                                    <span class="font-bold text-sm text-white">Ván {{ $g['game_number'] }}</span>
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-400">Thời gian gốc:</span>
+                                        <div class="flex items-center">
+                                            <input type="number" min="1" max="180" wire:model="knockoutGames.{{ $gIdx }}.base_minutes" class="w-16 bg-slate-900 border border-slate-700 rounded-l px-2 py-1 text-sm text-center text-white focus:outline-none focus:border-rose-500">
+                                            <span class="bg-slate-800 text-slate-400 px-2 py-1 text-xs border border-l-0 border-slate-700 rounded-r">phút</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-400">Gia tăng (+):</span>
+                                        <div class="flex items-center">
+                                            <input type="number" min="0" max="60" wire:model="knockoutGames.{{ $gIdx }}.increment_seconds" class="w-16 bg-slate-900 border border-slate-700 rounded-l px-2 py-1 text-sm text-center text-white focus:outline-none focus:border-rose-500">
+                                            <span class="bg-slate-800 text-slate-400 px-2 py-1 text-xs border border-l-0 border-slate-700 rounded-r">giây</span>
+                                        </div>
+                                    </div>
+
+                                    @if (count($knockoutGames) > 1)
+                                        <button type="button" wire:click="removeKnockoutGame({{ $gIdx }})" class="text-xs text-rose-400 hover:text-rose-300">
+                                            Xóa
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Start Playoff Button -->
+                <button type="button"
+                        wire:click="startKnockoutStage"
+                        class="w-full py-4 px-6 rounded-2xl font-black text-base bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white shadow-xl shadow-rose-950 flex items-center justify-center gap-2 transition cursor-pointer">
+                    <span>🔥</span>
+                    <span>Khởi Tạo Vòng Loại Trực Tiếp (1A vs 4B, 1B vs 4A, 2B vs 3A, 2A vs 3B)</span>
+                </button>
+            @else
+                <div class="text-center py-8 bg-slate-900 border border-slate-800 rounded-2xl text-slate-400 text-sm">
+                    ℹ️ Chờ Ban tổ chức hoàn tất vòng bảng để khởi tạo các cặp đấu Vòng loại trực tiếp.
+                </div>
+            @endif
         </div>
     @else
         <!-- Knockout Rounds Display (Tree / Rounds) -->
@@ -207,7 +221,7 @@
                             $isLastKnockoutRound = ($rIndex === $knockoutRounds->count() - 1);
                         @endphp
 
-                        @if ($allDone && $isLastKnockoutRound)
+                        @if ($isAdmin && $allDone && $isLastKnockoutRound)
                             @if ($round->stage_name === 'Tứ Kết')
                                 <button type="button"
                                         wire:click="generateNextRound({{ $round->id }})"

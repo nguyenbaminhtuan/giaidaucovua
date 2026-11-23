@@ -21,6 +21,8 @@ class PlayoffIntegrationTest extends TestCase
 
     public function test_playoff_board_renders_and_initiates_knockout_stage(): void
     {
+        session(['is_admin' => true]);
+
         $tournament = Tournament::create([
             'name' => 'Giải 20 Kỳ Thủ Playoff',
             'format' => 'round_robin_groups',
@@ -56,6 +58,8 @@ class PlayoffIntegrationTest extends TestCase
 
     public function test_knockout_match_requires_tie_break_if_tied_score(): void
     {
+        session(['is_admin' => true]);
+
         $tournament = Tournament::create(['name' => 'Giải Playoff Test', 'format' => 'round_robin_groups']);
         $round = Round::create([
             'tournament_id' => $tournament->id,
@@ -129,6 +133,8 @@ class PlayoffIntegrationTest extends TestCase
 
     public function test_playoff_header_and_description_can_be_edited(): void
     {
+        session(['is_admin' => true]);
+
         $tournament = Tournament::create([
             'name' => 'Giải Header Edit',
             'format' => 'round_robin_groups',
