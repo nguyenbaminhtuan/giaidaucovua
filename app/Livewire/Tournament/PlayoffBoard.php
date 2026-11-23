@@ -14,6 +14,10 @@ class PlayoffBoard extends Component
     public int $tournamentId;
     public int $advancingCount = 4;
 
+    public bool $isEditingHeader = false;
+    public string $editingTitle = '';
+    public string $editingDescription = '';
+
     public array $knockoutGames = [
         ['game_number' => 1, 'base_minutes' => 5, 'increment_seconds' => 2],
         ['game_number' => 2, 'base_minutes' => 15, 'increment_seconds' => 2],
@@ -24,6 +28,35 @@ class PlayoffBoard extends Component
         $this->tournamentId = $tournamentId;
         $tournament = Tournament::findOrFail($tournamentId);
         $this->advancingCount = $tournament->advancing_count ?: 4;
+    }
+
+    public function startEditingHeader(): void
+    {
+        $t = Tournament::findOrFail($this->tournamentId);
+        $this->editingTitle = $t->playoff_title ?: 'Vòng Loại Trực Tiếp (Playoff)';
+        $this->editingDescription = $t->playoff_description ?: 'Các kỳ thủ đầu bảng gặp nhau theo thể thức đấu loại trực tiếp để tranh Cúp Vô Địch và Hạng Ba.';
+        $this->isEditingHeader = true;
+    }
+
+    public function saveHeader(): void
+    {
+        $this->validate([
+            'editingTitle' => 'required|string|max:255',
+            'editingDescription' => 'nullable|string|max:1000',
+        ]);
+
+        $t = Tournament::findOrFail($this->tournamentId);
+        $t->playoff_title = trim($this->editingTitle);
+        $t->playoff_description = trim((string) $this->editingDescription);
+        $t->save();
+
+        $this->isEditingHeader = false;
+        session()->flash('playoff_msg', 'Đã cập nhật tiêu đề và mô tả Vòng loại trực tiếp!');
+    }
+
+    public function cancelEditingHeader(): void
+    {
+        $this->isEditingHeader = false;
     }
 
     public function addKnockoutGame(): void
@@ -113,7 +146,6 @@ class PlayoffBoard extends Component
             ->with(['matches.player1', 'matches.player2', 'matches.games'])
             ->get();
 
-        // Preview advancing players from standings
         $groups = $tournament->groups->values();
         $advancingPreview = [];
         foreach ($groups as $g) {

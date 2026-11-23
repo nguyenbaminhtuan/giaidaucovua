@@ -1,18 +1,55 @@
 <div class="space-y-8">
     <!-- Playoff Header & Notification -->
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-        <div>
+        <div class="flex-1">
             <div class="flex items-center gap-2 mb-1.5">
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-wider">
                     Knockout Stage
                 </span>
             </div>
-            <h2 class="text-2xl font-black text-white">
-                🥊 Vòng Loại Trực Tiếp (Playoff)
-            </h2>
-            <p class="text-sm text-slate-400 mt-1">
-                Các kỳ thủ đầu bảng gặp nhau theo thể thức đấu loại trực tiếp để tranh Cúp Vô Địch và Hạng Ba.
-            </p>
+
+            @if ($isEditingHeader)
+                <form wire:submit="saveHeader" class="space-y-3 mt-2 max-w-xl">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Tiêu đề vòng đấu:</label>
+                        <input type="text"
+                               wire:model="editingTitle"
+                               class="w-full bg-slate-950 border border-rose-500/60 rounded-lg px-3 py-1.5 text-white font-bold text-base focus:outline-none focus:ring-1 focus:ring-rose-500">
+                        @error('editingTitle') <span class="text-rose-400 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Mô tả dòng chữ nhỏ bên dưới:</label>
+                        <textarea wire:model="editingDescription" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-rose-500"></textarea>
+                        @error('editingDescription') <span class="text-rose-400 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-lg transition shadow">
+                            Lưu thay đổi
+                        </button>
+                        <button type="button" wire:click="cancelEditingHeader" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg transition">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            @else
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-black text-white">
+                        {{ $tournament->playoff_title ?: '🥊 Vòng Loại Trực Tiếp (Playoff)' }}
+                    </h2>
+                    <button type="button"
+                            wire:click="startEditingHeader"
+                            class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 transition flex items-center gap-1 cursor-pointer"
+                            title="Chỉnh sửa tiêu đề và mô tả">
+                        <span>✏️</span>
+                        <span>Sửa tiêu đề</span>
+                    </button>
+                </div>
+                <p class="text-sm text-slate-400 mt-1">
+                    {{ $tournament->playoff_description ?: 'Các kỳ thủ đầu bảng gặp nhau theo thể thức đấu loại trực tiếp để tranh Cúp Vô Địch và Hạng Ba.' }}
+                </p>
+            @endif
         </div>
 
         @if ($knockoutRounds->isNotEmpty())

@@ -126,4 +126,28 @@ class PlayoffIntegrationTest extends TestCase
         $this->assertEquals(1.0, $match->player2_score);
         $this->assertEquals($p1->id, $match->getWinner()->id);
     }
+
+    public function test_playoff_header_and_description_can_be_edited(): void
+    {
+        $tournament = Tournament::create([
+            'name' => 'Giải Header Edit',
+            'format' => 'round_robin_groups',
+            'advancing_count' => 4,
+        ]);
+
+        Livewire::test(PlayoffBoard::class, ['tournamentId' => $tournament->id])
+            ->assertSee('Vòng Loại Trực Tiếp (Playoff)')
+            ->call('startEditingHeader')
+            ->assertSet('isEditingHeader', true)
+            ->set('editingTitle', 'Vòng Chung Kết Tranh Ngai Vàng')
+            ->set('editingDescription', '8 kỳ thủ xuất sắc nhất tranh đấu để tìm ra nhà Vô địch 2026.')
+            ->call('saveHeader')
+            ->assertSet('isEditingHeader', false)
+            ->assertSee('Vòng Chung Kết Tranh Ngai Vàng')
+            ->assertSee('8 kỳ thủ xuất sắc nhất tranh đấu');
+
+        $tournament->refresh();
+        $this->assertEquals('Vòng Chung Kết Tranh Ngai Vàng', $tournament->playoff_title);
+        $this->assertEquals('8 kỳ thủ xuất sắc nhất tranh đấu để tìm ra nhà Vô địch 2026.', $tournament->playoff_description);
+    }
 }

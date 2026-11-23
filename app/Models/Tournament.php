@@ -14,6 +14,8 @@ class Tournament extends Model
         'name',
         'format',
         'advancing_count',
+        'playoff_title',
+        'playoff_description',
         'status',
     ];
 
