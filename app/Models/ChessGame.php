@@ -19,12 +19,14 @@ class ChessGame extends Model
         'black_player_id',
         'result',
         'status',
+        'is_tie_break',
     ];
 
     protected $casts = [
         'game_number' => 'integer',
         'base_minutes' => 'integer',
         'increment_seconds' => 'integer',
+        'is_tie_break' => 'boolean',
     ];
 
     public function match(): BelongsTo
@@ -44,6 +46,7 @@ class ChessGame extends Model
 
     public function getTimeControlLabelAttribute(): string
     {
-        return "{$this->base_minutes}m + {$this->increment_seconds}s";
+        $prefix = $this->is_tie_break ? '⚡ Tie-break: ' : '';
+        return "{$prefix}{$this->base_minutes}m + {$this->increment_seconds}s";
     }
 }

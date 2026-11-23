@@ -14,6 +14,8 @@ class Round extends Model
     protected $fillable = [
         'tournament_id',
         'group_id',
+        'stage', // 'group_stage', 'knockout'
+        'stage_name', // 'Tứ Kết', 'Bán Kết', 'Chung Kết', 'Tranh Hạng 3'
         'round_number',
     ];
 
@@ -30,5 +32,10 @@ class Round extends Model
     public function matches(): HasMany
     {
         return $this->hasMany(ChessMatch::class, 'round_id');
+    }
+
+    public function isKnockout(): bool
+    {
+        return $this->stage === 'knockout';
     }
 }

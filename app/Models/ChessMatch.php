@@ -95,4 +95,27 @@ class ChessMatch extends Model
 
         return $this->games->every(fn (ChessGame $game) => ! empty($game->result));
     }
+
+    public function isTied(): bool
+    {
+        return abs($this->player1_score - $this->player2_score) < 0.001;
+    }
+
+    public function getWinner(): ?Participant
+    {
+        if ($this->isTied()) {
+            return null;
+        }
+
+        return $this->player1_score > $this->player2_score ? $this->player1 : $this->player2;
+    }
+
+    public function getLoser(): ?Participant
+    {
+        if ($this->isTied()) {
+            return null;
+        }
+
+        return $this->player1_score > $this->player2_score ? $this->player2 : $this->player1;
+    }
 }

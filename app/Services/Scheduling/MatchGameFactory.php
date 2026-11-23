@@ -60,14 +60,16 @@ class MatchGameFactory
         }
 
         foreach ($tcCollection as $tc) {
-            $gameNumber = (int) $tc->game_number;
+            $gameNumber = (int) (is_array($tc) ? $tc['game_number'] : $tc->game_number);
+            $baseMinutes = (int) (is_array($tc) ? $tc['base_minutes'] : $tc->base_minutes);
+            $incrementSec = (int) (is_array($tc) ? ($tc['increment_seconds'] ?? 0) : ($tc->increment_seconds ?? 0));
             $isOdd = ($gameNumber % 2 !== 0);
 
             ChessGame::create([
                 'match_id' => $match->id,
                 'game_number' => $gameNumber,
-                'base_minutes' => (int) $tc->base_minutes,
-                'increment_seconds' => (int) ($tc->increment_seconds ?? 0),
+                'base_minutes' => $baseMinutes,
+                'increment_seconds' => $incrementSec,
                 'white_player_id' => $isOdd ? $player1->id : $player2->id,
                 'black_player_id' => $isOdd ? $player2->id : $player1->id,
                 'result' => null,

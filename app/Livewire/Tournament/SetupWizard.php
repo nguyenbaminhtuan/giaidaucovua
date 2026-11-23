@@ -11,6 +11,7 @@ class SetupWizard extends Component
 {
     public string $name = 'Giải Cờ Vua Giao Hữu';
     public string $format = 'round_robin_groups'; // 'round_robin_groups' or 'swiss'
+    public int $advancing_count = 4; // Top N players each group advance to playoff
 
     public array $groups = [
         [
@@ -110,6 +111,7 @@ class SetupWizard extends Component
         ];
 
         if ($this->format === 'round_robin_groups') {
+            $rules['advancing_count'] = 'required|integer|min:1|max:8';
             $rules['groups'] = 'required|array|min:1';
             $rules['groups.*.name'] = 'required|string|max:100';
             $rules['groups.*.games'] = 'required|array|min:1';
@@ -128,7 +130,8 @@ class SetupWizard extends Component
             $this->format,
             $this->groups,
             $this->swiss_games,
-            $this->swiss_players_text
+            $this->swiss_players_text,
+            $this->advancing_count
         );
 
         return $this->redirect(route('tournament.show', $tournament), navigate: true);

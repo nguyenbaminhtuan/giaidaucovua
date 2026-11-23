@@ -13,7 +13,12 @@ class Tournament extends Model
     protected $fillable = [
         'name',
         'format',
+        'advancing_count',
         'status',
+    ];
+
+    protected $casts = [
+        'advancing_count' => 'integer',
     ];
 
     public function groups(): HasMany
@@ -34,6 +39,16 @@ class Tournament extends Model
     public function rounds(): HasMany
     {
         return $this->hasMany(Round::class)->orderBy('round_number');
+    }
+
+    public function groupRounds(): HasMany
+    {
+        return $this->hasMany(Round::class)->where('stage', 'group_stage')->orderBy('round_number');
+    }
+
+    public function knockoutRounds(): HasMany
+    {
+        return $this->hasMany(Round::class)->where('stage', 'knockout')->orderBy('round_number');
     }
 
     public function standings(): HasMany

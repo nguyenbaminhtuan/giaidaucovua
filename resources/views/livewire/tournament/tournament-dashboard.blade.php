@@ -45,11 +45,16 @@
         </div>
 
         <!-- Quick Tabs -->
-        <div class="flex items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
-            <button type="button" wire:click="switchTab('matches')" class="px-4 py-2 rounded-lg text-sm font-bold transition {{ $activeTab === 'matches' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
-                ⚔️ Cặp Đấu
+        <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+            <button type="button" wire:click="switchTab('matches')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'matches' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
+                ⚔️ Vòng Bảng
             </button>
-            <button type="button" wire:click="switchTab('standings')" class="px-4 py-2 rounded-lg text-sm font-bold transition {{ $activeTab === 'standings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
+            @if ($tournament->format === 'round_robin_groups')
+                <button type="button" wire:click="switchTab('playoff')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'playoff' ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                    🥊 Vòng Loại Trực Tiếp
+                </button>
+            @endif
+            <button type="button" wire:click="switchTab('standings')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'standings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
                 🏆 Bảng Xếp Hạng
             </button>
         </div>
@@ -131,6 +136,9 @@
                 </div>
             @endif
         </div>
+    @elseif ($activeTab === 'playoff')
+        <!-- Playoff Tab View -->
+        <livewire:tournament.playoff-board :tournamentId="$tournament->id" />
     @else
         <!-- Standings Tab View -->
         <livewire:tournament.standings-board :tournamentId="$tournament->id" :selectedGroupId="$selectedGroupId" />

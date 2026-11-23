@@ -38,6 +38,27 @@
 
         <!-- Groups or Swiss -->
         @if ($format === 'round_robin_groups')
+            <!-- Advancing Count Selection -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-200">
+                            Số Lượng Người Mỗi Bảng Đi Tiếp Vào Vòng Loại Trực Tiếp (Playoff)
+                        </label>
+                        <p class="text-xs text-slate-400 mt-1">
+                            Ví dụ chọn 4: Lấy Top 4 Bảng A và Top 4 Bảng B (tổng 8 người) bốc thăm chéo (1A vs 4B, 1B vs 4A...) thi đấu Tứ kết ➔ Bán kết ➔ Chung kết & Tranh hạng 3.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select wire:model="advancing_count" class="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-amber-400 font-bold text-sm focus:outline-none focus:border-amber-500">
+                            <option value="1">Top 1 mỗi bảng (Vào Chung kết)</option>
+                            <option value="2">Top 2 mỗi bảng (Vào Bán kết - 4 người)</option>
+                            <option value="4">Top 4 mỗi bảng (Vào Tứ kết - 8 người)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <div>

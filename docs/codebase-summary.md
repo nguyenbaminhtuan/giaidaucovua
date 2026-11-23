@@ -10,6 +10,7 @@
 │   │       ├── TournamentList.php
 │   │       ├── SetupWizard.php
 │   │       ├── TournamentDashboard.php
+│   │       ├── PlayoffBoard.php
 │   │       ├── MatchRow.php
 │   │       └── StandingsBoard.php
 │   ├── Models/               # Eloquent Models
@@ -26,6 +27,7 @@
 │       ├── Scheduling/
 │       │   ├── RoundRobinSchedulerService.php
 │       │   ├── SwissSchedulerService.php
+│       │   ├── KnockoutSchedulerService.php
 │       │   └── MatchGameFactory.php
 │       └── Standings/
 │           └── StandingsCalculatorService.php

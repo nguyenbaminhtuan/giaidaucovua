@@ -22,12 +22,14 @@ class TournamentCreationService
         string $format,
         array $groups,
         array $swissGames,
-        string $swissPlayersText
+        string $swissPlayersText,
+        int $advancingCount = 4
     ): Tournament {
-        return DB::transaction(function () use ($name, $format, $groups, $swissGames, $swissPlayersText) {
+        return DB::transaction(function () use ($name, $format, $groups, $swissGames, $swissPlayersText, $advancingCount) {
             $tournament = Tournament::create([
                 'name' => $name,
                 'format' => $format,
+                'advancing_count' => $advancingCount,
                 'status' => 'in_progress',
             ]);
 

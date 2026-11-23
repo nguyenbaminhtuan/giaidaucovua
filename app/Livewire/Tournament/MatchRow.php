@@ -36,11 +36,48 @@ class MatchRow extends Component
         }
     }
 
-    public function confirmMatch(): void
+    public function addTieBreakGame(): void
     {
         $match = ChessMatch::with('games')->findOrFail($this->matchId);
+        if ($match->status === 'completed' || $match->is_bye) {
+            return;
+        }
+
+        $lastGame = $match->games->last();
+        $nextNum = ($match->games->max('game_number') ?? 0) + 1;
+
+        $whiteId = $lastGame ? $lastGame->black_player_id : $match->player1_id;
+        $blackId = $lastGame ? $lastGame->white_player_id : $match->player2_id;
+        $baseMinutes = $lastGame ? $lastGame->base_minutes : 3;
+        $incrementSec = $lastGame ? $lastGame->increment_seconds : 2;
+
+        ChessGame::create([
+            'match_id' => $match->id,
+            'game_number' => $nextNum,
+            'base_minutes' => $baseMinutes,
+            'increment_seconds' => $incrementSec,
+            'white_player_id' => $whiteId,
+            'black_player_id' => $blackId,
+            'result' => null,
+            'status' => 'pending',
+            'is_tie_break' => true,
+        ]);
+
+        $this->isOpen = true;
+        $this->dispatch('match-updated');
+    }
+
+    public function confirmMatch(): void
+    {
+        $match = ChessMatch::with(['round', 'games'])->findOrFail($this->matchId);
 
         if (! $match->areAllGamesFinished()) {
+            return;
+        }
+
+        // Knockout matches must have a decisive winner
+        if ($match->round?->isKnockout() && $match->isTied()) {
+            session()->flash('match_error', 'Trận đấu loại trực tiếp đang hòa. Cần đấu thêm ván phụ Tie-break!');
             return;
         }
 
