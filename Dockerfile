@@ -26,8 +26,10 @@ COPY --from=frontend --chown=www-data:www-data /app/public/build /var/www/html/p
 COPY docker/99-laravel-init.sh /etc/entrypoint.d/99-laravel-init.sh
 RUN chmod +x /etc/entrypoint.d/99-laravel-init.sh
 
-# Install production Composer dependencies
+# Install production Composer dependencies with retry on transient network 504
 USER www-data
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+ENV COMPOSER_PROCESS_TIMEOUT=600
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader || \
+    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 USER root
