@@ -76,6 +76,48 @@
         </div>
     </div>
 
+    <!-- Visual Stage Pipeline Tracker for Multi-Stage Tournaments -->
+    @if ($tournament->format === 'round_robin_groups')
+        <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 sm:p-5">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center justify-between">
+                <span>Lộ trình các giai đoạn trong giải:</span>
+                <span class="text-emerald-400 font-semibold lowercase">Tự động liên kết dữ liệu xuyên suốt</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <!-- Stage 1 -->
+                <div wire:click="switchTab('matches')" class="p-3.5 rounded-xl border transition cursor-pointer {{ $activeTab === 'matches' ? 'bg-amber-500/10 border-amber-500/50' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700' }}">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-amber-400">Giai Đoạn 1</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Vòng Bảng</span>
+                    </div>
+                    <div class="font-extrabold text-white text-sm">Vòng Bảng A & B</div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Đấu vòng tròn chọn Top {{ $tournament->advancing_count ?: 4 }} mỗi bảng vào Giai đoạn 2.</p>
+                </div>
+
+                <!-- Stage 2 -->
+                <div wire:click="switchTab('stage2')" class="p-3.5 rounded-xl border transition cursor-pointer {{ $activeTab === 'stage2' || $activeTab === 'playoff' ? 'bg-cyan-500/10 border-cyan-500/50' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700' }}">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-cyan-400">Giai Đoạn 2</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Đánh song song</span>
+                    </div>
+                    <div class="font-extrabold text-white text-sm">Playoff & Vòng Tròn 8 Người</div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Playoff tranh điểm thưởng (+4, +3, +2) & Vòng tròn 7 vòng lấy Top 5.</p>
+                </div>
+
+                <!-- Stage 3 -->
+                <div wire:click="switchTab('stepladder')" class="p-3.5 rounded-xl border transition cursor-pointer {{ $activeTab === 'stepladder' ? 'bg-rose-500/10 border-rose-500/50' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700' }}">
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-rose-400">Giai Đoạn 3</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Chung Kết</span>
+                    </div>
+                    <div class="font-extrabold text-white text-sm">Chung Kết Stepladder Top 5</div>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Trận 1, 2, Tranh HCĐ và Tranh HCV Vô Địch.</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if ($activeTab === 'matches')
         <!-- Matches Tab View -->
         <div class="space-y-4">

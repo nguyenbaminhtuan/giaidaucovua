@@ -26,6 +26,14 @@
         </div>
     </div>
 
+    <!-- Parallel Note Banner -->
+    <div class="p-3.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-xs text-cyan-300 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-base">⚡</span>
+            <span><strong>Chế độ thi đấu song song:</strong> Bạn có thể điều hành cả 2 nội dung <strong>song song cùng lúc</strong> (Nhánh Playoff tranh điểm thưởng và Vòng tròn 7 vòng). Điểm thưởng từ Playoff sẽ tự động kết nối và cộng dồn vào BXH Tổng Hợp theo thời gian thực!</span>
+        </div>
+    </div>
+
     <!-- Feedback messages -->
     @if (session()->has('stage2_msg'))
         <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm font-medium flex items-center gap-2">

@@ -1,44 +1,45 @@
 <div class="max-w-5xl mx-auto space-y-8">
     <div class="border-b border-slate-800 pb-4">
         <h1 class="text-2xl font-bold text-white flex items-center gap-2">
-            <span>⚙️</span> Thiết Lập Thể Thức Giải Đấu
+            <span>🏆</span> Khởi Tạo Giải Đấu Tổng & Thiết Lập Giai Đoạn 1
         </h1>
-        <p class="text-sm text-slate-400 mt-1">Cấu hình thể thức thi đấu, chia bảng, vòng chung kết Top 5 hoặc hệ Thụy Sĩ.</p>
+        <p class="text-sm text-slate-400 mt-1">Khởi tạo giải đấu cho CLB. Giai đoạn 1 bắt đầu thi đấu ngay; hệ thống tự động liên kết dữ liệu xuyên suốt để mở tiếp Giai đoạn 2 (đánh song song) và Chung kết.</p>
     </div>
 
     <form wire:submit="confirmAndGenerate" class="space-y-6">
         <!-- Tournament Name -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <label class="block text-sm font-semibold text-slate-200">Tên Giải Đấu</label>
-            <input type="text" wire:model="name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition" placeholder="Ví dụ: Vòng Chung Kết Top 5 Tranh Cúp 2026">
+            <label class="block text-sm font-semibold text-slate-200">Tên Giải Đấu Tổng</label>
+            <input type="text" wire:model="name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 transition" placeholder="Ví dụ: Giải Vô Địch Cờ Vua CLB Mùa Đông 2026">
             @error('name') <span class="text-rose-400 text-xs">{{ $message }}</span> @enderror
         </div>
 
         <!-- Format Selection -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-            <label class="block text-sm font-semibold text-slate-200">Chọn Thể Thức Thi Đấu</label>
+            <label class="block text-sm font-semibold text-slate-200">Kịch Bản Thi Đấu Cho Giải</label>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition {{ $format === 'round_robin_groups' ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700' }}">
                     <input type="radio" wire:model.live="format" value="round_robin_groups" class="mt-1 text-amber-500 focus:ring-amber-500">
                     <div>
-                        <span class="font-bold text-white block text-sm">Vòng Tròn Chia Bảng</span>
-                        <span class="text-xs text-slate-400 block mt-1">Chia bảng A, B, C... thi đấu vòng tròn và chọn số người đầu bảng đi tiếp.</span>
+                        <span class="font-bold text-white block text-sm">Nhiều Giai Đoạn Liên Kết</span>
+                        <span class="text-xs text-amber-400 font-semibold block mt-0.5">Khuyên dùng cho CLB</span>
+                        <span class="text-xs text-slate-400 block mt-1">GĐ 1 (Bảng A, B) ➔ GĐ 2 (Đánh song song Playoff & Vòng tròn 8 người) ➔ GĐ 3 (Chung kết Stepladder).</span>
                     </div>
                 </label>
 
                 <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition {{ $format === 'stepladder_top5' ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700' }}">
                     <input type="radio" wire:model.live="format" value="stepladder_top5" class="mt-1 text-amber-500 focus:ring-amber-500">
                     <div>
-                        <span class="font-bold text-amber-400 block text-sm">Chung Kết Top 5 (Stepladder)</span>
-                        <span class="text-xs text-slate-400 block mt-1">Dành cho 5 kỳ thủ: Trận 1 (Hạng 2 vs 3), Trận 2 (Hạng 4 vs 5), Tranh HCĐ và Tranh HCV.</span>
+                        <span class="font-bold text-amber-400 block text-sm">Chung Kết Top 5 Độc Lập</span>
+                        <span class="text-xs text-slate-400 block mt-1">Dành riêng cho 5 kỳ thủ: Trận 1 (Hạng 2 vs 3), Trận 2 (Hạng 4 vs 5), Tranh HCĐ và Tranh HCV.</span>
                     </div>
                 </label>
 
                 <label class="flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition {{ $format === 'swiss' ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700' }}">
                     <input type="radio" wire:model.live="format" value="swiss" class="mt-1 text-amber-500 focus:ring-amber-500">
                     <div>
-                        <span class="font-bold text-white block text-sm">Hệ Thụy Sĩ (Swiss)</span>
-                        <span class="text-xs text-slate-400 block mt-1">Ghép cặp theo nhóm điểm, chống gặp lại đối thủ cũ, cân bằng màu quân.</span>
+                        <span class="font-bold text-white block text-sm">Giải Đấu Hệ Thụy Sĩ</span>
+                        <span class="text-xs text-slate-400 block mt-1">Ghép cặp theo nhóm điểm, chống gặp lại đối thủ cũ, cân bằng màu quân qua từng vòng.</span>
                     </div>
                 </label>
             </div>
