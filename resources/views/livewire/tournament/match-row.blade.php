@@ -58,8 +58,8 @@
                         <button type="button" wire:click="selectWinner({{ $match->player2_id }})" class="px-2 py-0.5 rounded font-bold transition cursor-pointer {{ $match->winner_id === $match->player2_id ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-amber-300 hover:bg-slate-700' }}" title="Chọn {{ $match->player2->name }} thắng theo ưu thế xếp hạng">
                             👑 {{ $match->player2->name }}
                         </button>
-                        <button type="button" wire:click="addTieBreakGame" class="px-2 py-0.5 rounded bg-slate-800 text-slate-200 hover:bg-slate-700 font-semibold transition cursor-pointer" title="Đấu thêm ván phụ nếu điểm xếp hạng vẫn bằng nhau">
-                            ⚡ + Tie-break
+                        <button type="button" wire:click="addTieBreakGame" class="px-2 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold transition cursor-pointer flex items-center gap-1" title="Đấu thêm ván Armageddon nếu điểm xếp hạng vẫn bằng nhau">
+                            <span>⚡</span> Armageddon
                         </button>
                     </div>
                 @endif
@@ -84,7 +84,7 @@
                     @else
                         @if ($match->areAllGamesFinished())
                             @if ($match->round?->isKnockout() && $match->isTied() && ! $match->winner_id)
-                                <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận hòa: Hãy chọn người thắng theo BXH hoặc đấu Tie-break!">
+                                <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận hòa: Hãy chọn người thắng theo BXH hoặc đấu Armageddon!">
                                     <span>⚠️</span> Cần chọn người thắng
                                 </button>
                             @else
@@ -126,23 +126,29 @@
             <div class="flex items-center justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                 <span>{{ $isAdmin ? 'Chi tiết từng ván đấu (Nhấn kết quả để ghi điểm):' : 'Kết quả chi tiết từng ván đấu:' }}</span>
                 @if ($isAdmin && $match->status !== 'completed')
-                    <button type="button" wire:click="addTieBreakGame" class="text-amber-400 hover:text-amber-300 normal-case flex items-center gap-1 cursor-pointer">
-                        <span>⚡</span> + Thêm ván phụ (Tie-break)
+                    <button type="button" wire:click="addTieBreakGame" class="text-rose-400 hover:text-rose-300 normal-case font-bold flex items-center gap-1 cursor-pointer">
+                        <span>⚡</span> + Thêm ván Armageddon
                     </button>
                 @endif
             </div>
 
             @foreach ($match->games as $game)
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg bg-slate-900 border {{ $game->is_tie_break ? 'border-amber-500/40 bg-amber-500/5' : 'border-slate-800' }}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg bg-slate-900 border {{ $game->is_tie_break ? 'border-rose-500/50 bg-rose-500/10 shadow-sm' : 'border-slate-800' }}">
                     <!-- Game Info & Colors -->
                     <div class="flex items-center gap-3">
-                        <span class="px-2 py-0.5 rounded text-xs font-bold {{ $game->is_tie_break ? 'bg-amber-500 text-slate-950' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20' }}">
-                            {{ $game->is_tie_break ? 'Tie-break ' . $game->game_number : 'Ván ' . $game->game_number }}
-                        </span>
+                        @if ($game->is_tie_break)
+                            <span class="px-2.5 py-0.5 rounded text-xs font-black bg-rose-600 text-white shadow-sm flex items-center gap-1">
+                                <span>⚡</span> Armageddon
+                            </span>
+                        @else
+                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                Ván {{ $game->game_number }}
+                            </span>
 
-                        <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
-                            ⏱ {{ $game->time_control_label }}
-                        </span>
+                            <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                                ⏱ {{ $game->time_control_label }}
+                            </span>
+                        @endif
 
                         <div class="text-sm flex items-center gap-2">
                             <span class="inline-flex items-center gap-1 font-medium text-slate-200">

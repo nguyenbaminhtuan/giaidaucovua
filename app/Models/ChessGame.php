@@ -46,7 +46,10 @@ class ChessGame extends Model
 
     public function getTimeControlLabelAttribute(): string
     {
-        $prefix = $this->is_tie_break ? '⚡ Tie-break: ' : '';
-        return "{$prefix}{$this->base_minutes}m + {$this->increment_seconds}s";
+        if ($this->is_tie_break) {
+            return 'Armageddon';
+        }
+
+        return "{$this->base_minutes}m + {$this->increment_seconds}s";
     }
 }
