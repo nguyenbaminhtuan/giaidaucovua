@@ -131,6 +131,12 @@ class TournamentDashboard extends Component
         // Re-renders automatically
     }
 
+    #[On('switch-to-stepladder')]
+    public function onSwitchToStepladder(): void
+    {
+        $this->activeTab = 'stepladder';
+    }
+
     public function render()
     {
         $tournament = Tournament::with(['groups', 'rounds.matches'])

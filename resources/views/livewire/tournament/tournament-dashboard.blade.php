@@ -55,15 +55,23 @@
         <!-- Quick Tabs -->
         <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-950 border border-slate-800 rounded-xl">
             <button type="button" wire:click="switchTab('matches')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'matches' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
-                ⚔️ Vòng Bảng
+                ⚔️ Vòng Bảng (Giai Đoạn 1)
             </button>
             @if ($tournament->format === 'round_robin_groups')
                 <button type="button" wire:click="switchTab('playoff')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'playoff' ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow' : 'text-slate-400 hover:text-white' }}">
-                    🥊 Vòng Loại Trực Tiếp
+                    🥊 Nhánh Playoff (Điểm Thưởng)
+                </button>
+                <button type="button" wire:click="switchTab('stage2')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'stage2' ? 'bg-cyan-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
+                    🔄 Giai Đoạn 2 (Vòng Tròn 8 Người)
+                </button>
+            @endif
+            @if ($tournament->stepladderRounds()->exists() || $tournament->format === 'stepladder_top5')
+                <button type="button" wire:click="switchTab('stepladder')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'stepladder' ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                    👑 Chung Kết Stepladder
                 </button>
             @endif
             <button type="button" wire:click="switchTab('standings')" class="px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-bold transition {{ $activeTab === 'standings' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white' }}">
-                🏆 Bảng Xếp Hạng
+                🏆 BXH Vòng Bảng
             </button>
         </div>
     </div>
@@ -153,6 +161,37 @@
     @elseif ($activeTab === 'playoff')
         <!-- Playoff Tab View -->
         <livewire:tournament.playoff-board :tournamentId="$tournament->id" />
+    @elseif ($activeTab === 'stage2')
+        <!-- Stage 2 Board (7 rounds round-robin + combined standings) -->
+        <livewire:tournament.stage2-board :tournamentId="$tournament->id" />
+    @elseif ($activeTab === 'stepladder')
+        <!-- Stepladder Finals Display -->
+        <div class="space-y-6">
+            @php
+                $stepladderRounds = $tournament->stepladderRounds()->with('matches.games', 'matches.player1', 'matches.player2')->get();
+                if ($stepladderRounds->isEmpty() && $tournament->format === 'stepladder_top5') {
+                    $stepladderRounds = $tournament->rounds()->where('stage', 'knockout')->with('matches.games', 'matches.player1', 'matches.player2')->get();
+                }
+            @endphp
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                <h2 class="text-xl font-black text-amber-400 flex items-center gap-2">
+                    <span>👑</span> Vòng Chung Kết Stepladder Top 5
+                </h2>
+                <p class="text-xs text-slate-400 mt-1">Trận 1 (Hạng 2 vs 3), Trận 2 (Hạng 4 vs 5), Trận Tranh HCĐ và Trận Tranh HCV.</p>
+            </div>
+            @foreach ($stepladderRounds as $stRound)
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 space-y-4">
+                    <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 shadow">
+                        {{ $stRound->stage_name }}
+                    </span>
+                    <div class="space-y-3">
+                        @foreach ($stRound->matches as $match)
+                            <livewire:tournament.match-row :matchId="$match->id" :key="'step-match-' . $match->id" />
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        </div>
     @else
         <!-- Standings Tab View -->
         <livewire:tournament.standings-board :tournamentId="$tournament->id" :selectedGroupId="$selectedGroupId" />

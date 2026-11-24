@@ -14,6 +14,9 @@ class Tournament extends Model
         'name',
         'format',
         'advancing_count',
+        'bonus_top1',
+        'bonus_top2',
+        'bonus_top3',
         'playoff_title',
         'playoff_description',
         'status',
@@ -21,6 +24,9 @@ class Tournament extends Model
 
     protected $casts = [
         'advancing_count' => 'integer',
+        'bonus_top1' => 'float',
+        'bonus_top2' => 'float',
+        'bonus_top3' => 'float',
     ];
 
     public function groups(): HasMany
@@ -51,6 +57,16 @@ class Tournament extends Model
     public function knockoutRounds(): HasMany
     {
         return $this->hasMany(Round::class)->where('stage', 'knockout')->orderBy('round_number');
+    }
+
+    public function stage2Rounds(): HasMany
+    {
+        return $this->hasMany(Round::class)->where('stage', 'stage2_round_robin')->orderBy('round_number');
+    }
+
+    public function stepladderRounds(): HasMany
+    {
+        return $this->hasMany(Round::class)->where('stage', 'stepladder')->orderBy('round_number');
     }
 
     public function standings(): HasMany

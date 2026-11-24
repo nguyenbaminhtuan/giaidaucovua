@@ -13,12 +13,14 @@ class Standing extends Model
     protected $fillable = [
         'tournament_id',
         'group_id',
+        'stage',
         'participant_id',
         'played',
         'won',
         'drawn',
         'lost',
         'points',
+        'bonus_points',
         'tie_break_score',
     ];
 
@@ -28,6 +30,7 @@ class Standing extends Model
         'drawn' => 'integer',
         'lost' => 'integer',
         'points' => 'float',
+        'bonus_points' => 'float',
         'tie_break_score' => 'float',
     ];
 
@@ -44,5 +47,10 @@ class Standing extends Model
     public function participant(): BelongsTo
     {
         return $this->belongsTo(Participant::class);
+    }
+
+    public function getTotalPointsAttribute(): float
+    {
+        return (float) ($this->points + $this->bonus_points);
     }
 }
