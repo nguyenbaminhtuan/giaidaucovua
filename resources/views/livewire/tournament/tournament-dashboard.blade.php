@@ -3,8 +3,8 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div>
             <div class="flex items-center gap-2 mb-1.5">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider {{ $tournament->format === 'round_robin_groups' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' }}">
-                    {{ $tournament->format === 'round_robin_groups' ? 'Đấu Vòng Tròn Chia Bảng' : 'Hệ Thụy Sĩ (Swiss)' }}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider {{ $tournament->format === 'stepladder_top5' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : ($tournament->format === 'round_robin_groups' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20') }}">
+                    {{ $tournament->format === 'stepladder_top5' ? 'Chung Kết Top 5 (Stepladder)' : ($tournament->format === 'round_robin_groups' ? 'Đấu Vòng Tròn Chia Bảng' : 'Hệ Thụy Sĩ (Swiss)') }}
                 </span>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     Đang Diễn Ra
@@ -43,6 +43,12 @@
 
             @if (session()->has('name_updated'))
                 <span class="text-emerald-400 text-xs block mt-1">✓ {{ session('name_updated') }}</span>
+            @endif
+            @if (session()->has('dashboard_msg'))
+                <span class="text-emerald-400 text-xs block mt-1">✓ {{ session('dashboard_msg') }}</span>
+            @endif
+            @if (session()->has('dashboard_error'))
+                <span class="text-rose-400 text-xs block mt-1">⚠️ {{ session('dashboard_error') }}</span>
             @endif
         </div>
 
@@ -107,16 +113,22 @@
 
                     <!-- Round Selector -->
                     <div class="flex items-center gap-2 overflow-x-auto">
-                        <span class="text-xs font-semibold text-slate-400 uppercase mr-1">Vòng đấu:</span>
+                        <span class="text-xs font-semibold text-slate-400 uppercase mr-1">Vòng/Giai đoạn:</span>
                         @foreach ($rounds as $r)
                             <button type="button" wire:click="selectRound({{ $r->round_number }})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {{ ($activeRound?->round_number ?? 1) === $r->round_number ? 'bg-slate-100 text-slate-950 shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700' }}">
-                                Vòng {{ $r->round_number }}
+                                {{ $r->stage_name ?: 'Vòng ' . $r->round_number }}
                             </button>
                         @endforeach
 
                         @if ($tournament->format === 'swiss' && session('is_admin'))
                             <button type="button" wire:click="generateNextSwissRound" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition cursor-pointer">
                                 + Bốc Thăm Vòng Mới
+                            </button>
+                        @endif
+
+                        @if ($tournament->format === 'stepladder_top5' && session('is_admin') && $rounds->count() < 2)
+                            <button type="button" wire:click="generateStepladderFinals" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 transition cursor-pointer flex items-center gap-1 shadow">
+                                <span>🏆</span> Bốc Thăm Tranh HCV & HCĐ
                             </button>
                         @endif
                     </div>

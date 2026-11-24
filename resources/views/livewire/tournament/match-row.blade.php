@@ -11,7 +11,12 @@
 
             <!-- Player 1 -->
             <div class="flex items-center gap-2 flex-1 md:flex-none md:w-48 text-right md:text-left">
-                <span class="font-bold text-base text-white truncate">{{ $match->player1->name }}</span>
+                <span class="font-bold text-base {{ $match->winner_id === $match->player1_id ? 'text-amber-400 font-extrabold' : 'text-white' }} truncate">
+                    {{ $match->player1->name }}
+                    @if ($match->winner_id === $match->player1_id && $match->isTied())
+                        <span class="text-xs text-amber-400 ml-1" title="Thắng theo ưu thế xếp hạng">👑</span>
+                    @endif
+                </span>
             </div>
 
             <!-- Score Badge -->
@@ -26,7 +31,12 @@
                 @if ($match->is_bye)
                     <span class="text-sm italic text-slate-500">(Nghỉ đấu / Bye)</span>
                 @else
-                    <span class="font-bold text-base text-white truncate">{{ $match->player2?->name }}</span>
+                    <span class="font-bold text-base {{ $match->winner_id === $match->player2_id ? 'text-amber-400 font-extrabold' : 'text-white' }} truncate">
+                        {{ $match->player2?->name }}
+                        @if ($match->winner_id === $match->player2_id && $match->isTied())
+                            <span class="text-xs text-amber-400 ml-1" title="Thắng theo ưu thế xếp hạng">👑</span>
+                        @endif
+                    </span>
                 @endif
             </div>
         </div>
@@ -38,11 +48,20 @@
                     Miễn đấu (+1.0)
                 </span>
             @else
-                <!-- Button to add Tie-break game if tied (Admin only) -->
+                <!-- Admin Tie-break Selection Buttons -->
                 @if ($isAdmin && $match->status !== 'completed' && $match->areAllGamesFinished() && $match->isTied())
-                    <button type="button" wire:click="addTieBreakGame" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition cursor-pointer">
-                        <span>⚡</span> + Ván Tie-break
-                    </button>
+                    <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs">
+                        <span class="text-amber-300 font-medium pl-1 hidden sm:inline">Hòa! Chọn thắng (BXH):</span>
+                        <button type="button" wire:click="selectWinner({{ $match->player1_id }})" class="px-2 py-0.5 rounded font-bold transition cursor-pointer {{ $match->winner_id === $match->player1_id ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-amber-300 hover:bg-slate-700' }}" title="Chọn {{ $match->player1->name }} thắng theo ưu thế xếp hạng">
+                            👑 {{ $match->player1->name }}
+                        </button>
+                        <button type="button" wire:click="selectWinner({{ $match->player2_id }})" class="px-2 py-0.5 rounded font-bold transition cursor-pointer {{ $match->winner_id === $match->player2_id ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-800 text-amber-300 hover:bg-slate-700' }}" title="Chọn {{ $match->player2->name }} thắng theo ưu thế xếp hạng">
+                            👑 {{ $match->player2->name }}
+                        </button>
+                        <button type="button" wire:click="addTieBreakGame" class="px-2 py-0.5 rounded bg-slate-800 text-slate-200 hover:bg-slate-700 font-semibold transition cursor-pointer" title="Đấu thêm ván phụ nếu điểm xếp hạng vẫn bằng nhau">
+                            ⚡ + Tie-break
+                        </button>
+                    </div>
                 @endif
 
                 <!-- Accordion Toggle Button -->
@@ -64,9 +83,9 @@
                         </div>
                     @else
                         @if ($match->areAllGamesFinished())
-                            @if ($match->round?->isKnockout() && $match->isTied())
-                                <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận loại trực tiếp hòa cần đấu thêm Tie-break!">
-                                    <span>⚠️</span> Cần đấu Tie-break
+                            @if ($match->round?->isKnockout() && $match->isTied() && ! $match->winner_id)
+                                <button type="button" disabled class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-600/30 text-amber-300 border border-amber-500/30 cursor-not-allowed" title="Trận hòa: Hãy chọn người thắng theo BXH hoặc đấu Tie-break!">
+                                    <span>⚠️</span> Cần chọn người thắng
                                 </button>
                             @else
                                 <button type="button" wire:click="confirmMatch" wire:loading.attr="disabled" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950 transition cursor-pointer">

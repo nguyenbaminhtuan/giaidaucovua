@@ -6,6 +6,7 @@ use App\Models\ChessMatch;
 use App\Models\Round;
 use App\Models\Tournament;
 use App\Models\TournamentGroup;
+use App\Services\Scheduling\StepladderSchedulerService;
 use App\Services\Scheduling\SwissSchedulerService;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -15,7 +16,7 @@ use Livewire\Component;
 class TournamentDashboard extends Component
 {
     public int $tournamentId;
-    public string $activeTab = 'matches'; // 'matches' | 'standings'
+    public string $activeTab = 'matches'; // 'matches' | 'playoff' | 'standings'
     public ?int $selectedGroupId = null;
     public int $selectedRoundNumber = 1;
 
@@ -41,6 +42,9 @@ class TournamentDashboard extends Component
 
     public function startEditingName(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $tournament = Tournament::findOrFail($this->tournamentId);
         $this->editingName = $tournament->name;
         $this->isEditingName = true;
@@ -48,6 +52,9 @@ class TournamentDashboard extends Component
 
     public function saveName(): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $this->validate([
             'editingName' => 'required|string|max:255',
         ]);
@@ -85,6 +92,9 @@ class TournamentDashboard extends Component
 
     public function generateNextSwissRound(SwissSchedulerService $swissScheduler): void
     {
+        if (! session('is_admin')) {
+            return;
+        }
         $tournament = Tournament::with(['rounds.matches'])->findOrFail($this->tournamentId);
         $maxRound = $tournament->rounds->max('round_number') ?? 0;
         $nextRoundNum = $maxRound + 1;
@@ -92,6 +102,27 @@ class TournamentDashboard extends Component
         $swissScheduler->generateNextRound($tournament, $nextRoundNum);
         $this->selectedRoundNumber = $nextRoundNum;
         $this->dispatch('match-updated');
+    }
+
+    public function generateStepladderFinals(StepladderSchedulerService $stepladderScheduler): void
+    {
+        if (! session('is_admin')) {
+            return;
+        }
+
+        $tournament = Tournament::with(['rounds.matches.games'])->findOrFail($this->tournamentId);
+        $r1 = $tournament->rounds()->where('round_number', 1)->first();
+
+        if ($r1) {
+            $finalsRound = $stepladderScheduler->generateFinalsRound($tournament, $r1, $tournament->timeControls);
+            if ($finalsRound) {
+                $this->selectedRoundNumber = $finalsRound->round_number;
+                $this->dispatch('match-updated');
+                session()->flash('dashboard_msg', 'Đã khởi tạo xong Trận Tranh HCV và Tranh HCĐ!');
+            } else {
+                session()->flash('dashboard_error', 'Chưa thể tạo Trận Chung Kết: Cần chốt điểm và xác định người thắng ở Trận 1 và Trận 2 trước.');
+            }
+        }
     }
 
     #[On('match-updated')]
@@ -120,14 +151,12 @@ class TournamentDashboard extends Component
             $rounds = collect();
             $activeRound = null;
         } else {
-            // Get available rounds based on filter
             $roundsQuery = Round::where('tournament_id', $tournament->id);
             if ($tournament->format === 'round_robin_groups' && $this->selectedGroupId) {
                 $roundsQuery->where('group_id', $this->selectedGroupId);
             }
             $rounds = $roundsQuery->orderBy('round_number')->get();
 
-            // Active round matches
             $activeRound = $rounds->firstWhere('round_number', $this->selectedRoundNumber) ?? $rounds->first();
             $matches = $activeRound ? $activeRound->matches()->with(['round.group', 'player1', 'player2'])->get() : collect();
         }

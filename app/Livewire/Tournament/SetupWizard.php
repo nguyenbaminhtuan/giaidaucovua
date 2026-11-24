@@ -9,9 +9,9 @@ use Livewire\Component;
 #[Title('Thiết Lập Giải Đấu Cờ Vua')]
 class SetupWizard extends Component
 {
-    public string $name = 'Giải Cờ Vua Giao Hữu';
-    public string $format = 'round_robin_groups'; // 'round_robin_groups' or 'swiss'
-    public int $advancing_count = 4; // Top N players each group advance to playoff
+    public string $name = 'Vòng Chung Kết Top 5';
+    public string $format = 'round_robin_groups'; // 'round_robin_groups', 'stepladder_top5', 'swiss'
+    public int $advancing_count = 4;
 
     public array $groups = [
         [
@@ -31,11 +31,20 @@ class SetupWizard extends Component
         ],
     ];
 
+    public array $stepladder_players = [
+        0 => 'Kỳ thủ Hạng 1 (Chờ ở Chung Kết)',
+        1 => 'Kỳ thủ Hạng 2',
+        2 => 'Kỳ thủ Hạng 3',
+        3 => 'Kỳ thủ Hạng 4',
+        4 => 'Kỳ thủ Hạng 5',
+    ];
+
     public string $swiss_players_text = "Nguyễn Văn A\nTrần Văn B\nLê Văn C\nPhạm Văn D\nHoàng Văn E\nVũ Văn F";
 
     public array $swiss_games = [
         ['game_number' => 1, 'base_minutes' => 5, 'increment_seconds' => 2],
-        ['game_number' => 2, 'base_minutes' => 15, 'increment_seconds' => 2],
+        ['game_number' => 2, 'base_minutes' => 5, 'increment_seconds' => 2],
+        ['game_number' => 3, 'base_minutes' => 5, 'increment_seconds' => 2],
     ];
 
     public function mount()
@@ -115,7 +124,7 @@ class SetupWizard extends Component
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'format' => 'required|in:round_robin_groups,swiss',
+            'format' => 'required|in:round_robin_groups,stepladder_top5,swiss',
         ];
 
         if ($this->format === 'round_robin_groups') {
@@ -125,6 +134,12 @@ class SetupWizard extends Component
             $rules['groups.*.games'] = 'required|array|min:1';
             $rules['groups.*.games.*.base_minutes'] = 'required|integer|min:1|max:180';
             $rules['groups.*.games.*.increment_seconds'] = 'required|integer|min:0|max:60';
+        } elseif ($this->format === 'stepladder_top5') {
+            $rules['stepladder_players'] = 'required|array|size:5';
+            $rules['stepladder_players.*'] = 'required|string|max:100';
+            $rules['swiss_games'] = 'required|array|min:1';
+            $rules['swiss_games.*.base_minutes'] = 'required|integer|min:1|max:180';
+            $rules['swiss_games.*.increment_seconds'] = 'required|integer|min:0|max:60';
         } else {
             $rules['swiss_games'] = 'required|array|min:1';
             $rules['swiss_games.*.base_minutes'] = 'required|integer|min:1|max:180';
@@ -139,7 +154,8 @@ class SetupWizard extends Component
             $this->groups,
             $this->swiss_games,
             $this->swiss_players_text,
-            $this->advancing_count
+            $this->advancing_count,
+            $this->stepladder_players
         );
 
         return $this->redirect(route('tournament.show', $tournament), navigate: true);

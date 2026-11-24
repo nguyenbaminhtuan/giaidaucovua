@@ -15,6 +15,11 @@ class Participant extends Model
         'tournament_id',
         'group_id',
         'name',
+        'seed',
+    ];
+
+    protected $casts = [
+        'seed' => 'integer',
     ];
 
     public function tournament(): BelongsTo

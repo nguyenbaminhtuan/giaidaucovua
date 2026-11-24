@@ -86,8 +86,8 @@
                     <div class="space-y-3">
                         <!-- Format & Status Badges -->
                         <div class="flex items-center justify-between gap-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider {{ $t->format === 'round_robin_groups' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' }}">
-                                {{ $t->format === 'round_robin_groups' ? 'Vòng Tròn Chia Bảng' : 'Hệ Thụy Sĩ' }}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider {{ $t->format === 'stepladder_top5' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : ($t->format === 'round_robin_groups' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20') }}">
+                                {{ $t->format === 'stepladder_top5' ? 'Chung Kết Top 5' : ($t->format === 'round_robin_groups' ? 'Vòng Tròn Chia Bảng' : 'Hệ Thụy Sĩ') }}
                             </span>
 
                             <span class="text-xs text-slate-500">

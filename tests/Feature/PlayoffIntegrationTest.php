@@ -106,7 +106,7 @@ class PlayoffIntegrationTest extends TestCase
         // Attempting to confirm tied knockout match fails
         Livewire::test(MatchRow::class, ['matchId' => $match->id])
             ->call('confirmMatch')
-            ->assertSee('Trận đấu loại trực tiếp đang hòa. Cần đấu thêm ván phụ Tie-break!');
+            ->assertSee('Trận đấu đang hòa điểm. Hãy chọn người thắng theo BXH hoặc đấu thêm ván phụ!');
 
         $match->refresh();
         $this->assertEquals('pending', $match->status);

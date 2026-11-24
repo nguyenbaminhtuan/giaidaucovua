@@ -30,6 +30,7 @@
 │       │   ├── RoundRobinSchedulerService.php
 │       │   ├── SwissSchedulerService.php
 │       │   ├── KnockoutSchedulerService.php
+│       │   ├── StepladderSchedulerService.php
 │       │   └── MatchGameFactory.php
 │       └── Standings/
 │           └── StandingsCalculatorService.php

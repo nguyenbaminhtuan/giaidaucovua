@@ -40,6 +40,23 @@ class MatchRow extends Component
         }
     }
 
+    public function selectWinner(int $participantId): void
+    {
+        if (! session('is_admin')) {
+            return;
+        }
+
+        $match = ChessMatch::findOrFail($this->matchId);
+        if ($match->status === 'completed' || $match->is_bye) {
+            return;
+        }
+
+        $match->winner_id = $participantId;
+        $match->save();
+
+        $this->dispatch('match-updated');
+    }
+
     public function addTieBreakGame(): void
     {
         if (! session('is_admin')) {
@@ -88,8 +105,8 @@ class MatchRow extends Component
         }
 
         // Knockout matches must have a decisive winner
-        if ($match->round?->isKnockout() && $match->isTied()) {
-            session()->flash('match_error', 'Trận đấu loại trực tiếp đang hòa. Cần đấu thêm ván phụ Tie-break!');
+        if ($match->round?->isKnockout() && $match->isTied() && ! $match->winner_id) {
+            session()->flash('match_error', 'Trận đấu đang hòa điểm. Hãy chọn người thắng theo BXH hoặc đấu thêm ván phụ!');
             return;
         }
 
@@ -117,7 +134,7 @@ class MatchRow extends Component
 
     public function render()
     {
-        $match = ChessMatch::with(['round.group', 'player1', 'player2', 'games.whitePlayer', 'games.blackPlayer'])
+        $match = ChessMatch::with(['round.group', 'player1', 'player2', 'winner', 'games.whitePlayer', 'games.blackPlayer'])
             ->findOrFail($this->matchId);
 
         return view('livewire.tournament.match-row', [

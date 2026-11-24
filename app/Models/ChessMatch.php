@@ -18,6 +18,7 @@ class ChessMatch extends Model
         'is_bye',
         'player1_score',
         'player2_score',
+        'winner_id',
         'status',
     ];
 
@@ -42,6 +43,11 @@ class ChessMatch extends Model
         return $this->belongsTo(Participant::class, 'player2_id');
     }
 
+    public function winner(): BelongsTo
+    {
+        return $this->belongsTo(Participant::class, 'winner_id');
+    }
+
     public function games(): HasMany
     {
         return $this->hasMany(ChessGame::class, 'match_id')->orderBy('game_number');
@@ -52,6 +58,7 @@ class ChessMatch extends Model
         if ($this->is_bye) {
             $this->player1_score = 1.0;
             $this->player2_score = 0.0;
+            $this->winner_id = $this->player1_id;
             $this->save();
             return;
         }
@@ -80,6 +87,14 @@ class ChessMatch extends Model
 
         $this->player1_score = $p1;
         $this->player2_score = $p2;
+
+        if ($p1 > $p2) {
+            $this->winner_id = $this->player1_id;
+        } elseif ($p2 > $p1) {
+            $this->winner_id = $this->player2_id;
+        }
+        // If tied, keep manual override winner_id if already selected by admin
+
         $this->save();
     }
 
@@ -103,6 +118,10 @@ class ChessMatch extends Model
 
     public function getWinner(): ?Participant
     {
+        if ($this->winner_id) {
+            return $this->winner_id === $this->player1_id ? $this->player1 : $this->player2;
+        }
+
         if ($this->isTied()) {
             return null;
         }
@@ -112,6 +131,10 @@ class ChessMatch extends Model
 
     public function getLoser(): ?Participant
     {
+        if ($this->winner_id) {
+            return $this->winner_id === $this->player1_id ? $this->player2 : $this->player1;
+        }
+
         if ($this->isTied()) {
             return null;
         }
